@@ -1,7 +1,6 @@
 """
 Test management commands
 """
-import six
 import sys
 
 from django.core.management import call_command
@@ -20,17 +19,14 @@ class Capturing(list):
     def __enter__(self):
         self._stdout = sys.stdout
         self._stderr = sys.stderr
-        if six.PY2:
-            from StringIO import StringIO
-        else:
-            from io import StringIO
+        from io import StringIO
         sys.stdout = sys.stderr = self._stringio = StringIO()
         return self
 
     def __exit__(self, *args):
         # Ensure output is unicode
         self.extend(
-            six.text_type(line)
+            str(line)
             for line in self._stringio.getvalue().splitlines()
         )
         sys.stdout = self._stdout
@@ -65,6 +61,8 @@ class CommandTestCase(TestCase):
 
 
 class TestAnonymiseCommand(CommandTestCase):
+    databases = ["gdpr_log", "default"]
+
     def test_anonymise_command__anonymises_data(self):
         obj_1 = ModelWithPrivacyMeta.objects.create(
             chars='test',
@@ -76,7 +74,7 @@ class TestAnonymiseCommand(CommandTestCase):
 
         obj_1.refresh_from_db()
         self.assertTrue(obj_1.anonymised)
-        self.assertEqual(obj_1.chars, six.text_type(obj_1.pk))
+        self.assertEqual(obj_1.chars, str(obj_1.pk))
         self.assertEqual(obj_1.email, '{}@anon.example.com'.format(obj_1.pk))
 
     def test_anonymise_disabled__raises_error(self):
@@ -92,6 +90,8 @@ class TestAnonymiseCommand(CommandTestCase):
 
 
 class TestRerunCommand(CommandTestCase):
+    databases = ["gdpr_log", "default"]
+
     def test_gdpr_delete__deletes_object(self):
         obj_1 = ModelWithPrivacyMeta.objects.create(
             chars='test',
@@ -120,5 +120,5 @@ class TestRerunCommand(CommandTestCase):
         self.assertEqual(ModelWithPrivacyMeta.objects.count(), 1)
         obj_1.refresh_from_db()
         self.assertTrue(obj_1.anonymised)
-        self.assertEqual(obj_1.chars, six.text_type(obj_1.pk))
+        self.assertEqual(obj_1.chars, str(obj_1.pk))
         self.assertEqual(obj_1.email, '{}@anon.example.com'.format(obj_1.pk))

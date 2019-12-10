@@ -5,7 +5,6 @@ import datetime
 from decimal import Decimal
 from freezegun import freeze_time
 import os
-import six
 import uuid
 
 from django.db import models
@@ -44,6 +43,8 @@ class TestAnonymisationBase(TestCase):
 
 
 class TestOnDeleteAnonymise(TestCase):
+    databases = ["gdpr_log", "default"]
+
     def test_anonymise_action__set_null__initialises(self):
         action = gdpr_assist.ANONYMISE(models.SET_NULL)
         self.assertIsInstance(action, gdpr_assist.ANONYMISE)
@@ -67,6 +68,7 @@ class TestOnDeleteAnonymiseDeconstruct(MigrationTestCase):
     """
     Test on_delete=ANONYMISE can be deconstructed
     """
+    databases = ["gdpr_log", "default"]
     def test_anonymise_deconstruct__deconstructs(self):
         string, imports = self.serialize(
             gdpr_assist.ANONYMISE(models.SET_NULL),
@@ -84,6 +86,7 @@ class TestNotNullableAnonymisation(TestAnonymisationBase):
     """
     Test all field types when they do not have null=True
     """
+    databases = ["gdpr_log", "default"]
     models = not_nullable_models
 
     def test_big_integer__anonymise_to_zero(self):
@@ -391,8 +394,7 @@ class TestNotNullableAnonymisation(TestAnonymisationBase):
             obj.field,
             uuid.UUID('{00000000-0000-0000-0000-000000000000}'),
         )
-        six.assertRegex(
-            self,
+        self.assertRegex(
             str(obj.field),
             r'[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}',
         )
@@ -443,7 +445,7 @@ class TestNullableAnonymisation(TestAnonymisationBase):
     """
     Test all field types when they do have null=True
     """
-
+    databases = ["gdpr_log", "default"]
     models = nullable_models
 
     def test_big_integer__anonymise_to_none(self):
@@ -743,6 +745,7 @@ class TestForbiddenAnonymisation(TestAnonymisationBase):
     """
     Test field types which are forbidden
     """
+    databases = ["gdpr_log", "default"]
     models = forbidden_models
 
     def test_autofield__raise_exception(self):
@@ -785,6 +788,7 @@ class TestForbiddenAnonymisation(TestAnonymisationBase):
 
 
 class TestRelation(TestCase):
+    databases = ["gdpr_log", "default"]
     def test_onetoonefield_anonymise__anonymise_not_propagated(self):
         target = PrivateTargetModel.objects.create(chars='Test')
         obj = OneToOneFieldModel.objects.create(chars='Test', target=target)
@@ -844,6 +848,7 @@ class TestOtherAnonymisation(TestAnonymisationBase):
     """
     Tests which don't fall under other categories
     """
+    databases = ["gdpr_log", "default"]
     models = nullable_models
 
     def test_anonymise_twice_no_force__not_anonymised_twice(self):
@@ -881,6 +886,7 @@ class TestOtherAnonymisation(TestAnonymisationBase):
 
 
 class TestQuerySet(TestCase):
+    databases = ["gdpr_log", "default"]
     def test_queryset_anonymise__anonymise_all(self):
         objs = []
         for i in range(5):

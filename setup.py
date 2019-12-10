@@ -4,7 +4,7 @@ import sys
 from setuptools import setup, find_packages
 
 
-VERSION = '1.0.1'
+VERSION = '2.0.0'
 
 
 def read(fname):
@@ -55,7 +55,7 @@ def runtests(args):
         )
 
         # Backwards compatibility for middleware
-        if django.VERSION < (1, 10):
+        if django.VERSION < (2, 2):
             SETTINGS['MIDDLEWARE_CLASSES'] = SETTINGS['MIDDLEWARE']
 
         # Build database settings
@@ -74,15 +74,6 @@ def runtests(args):
             if engine == "pgsql":
                 DATABASE['ENGINE'] = 'django.db.backends.postgresql_psycopg2'
                 DATABASE['HOST'] = 'localhost'
-            elif engine == "mysql":
-                DATABASE['ENGINE'] = 'django.db.backends.mysql'
-
-                # Make sure test DB is going to be UTF8
-                DATABASE['TEST'] = {
-                    'CHARSET': 'utf8',
-                    'COLLATION': 'utf8_general_ci',
-                }
-
             else:
                 raise ValueError("Unknown database engine")
 
@@ -122,20 +113,11 @@ setup(
         'Intended Audience :: Developers',
         'License :: OSI Approved :: BSD License',
         'Operating System :: OS Independent',
-        'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.4',
-        'Programming Language :: Python :: 3.5',
-        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.8',
         'Framework :: Django',
-        'Framework :: Django :: 1.8',
-        'Framework :: Django :: 1.11',
-        'Framework :: Django :: 2.0',
-        'Framework :: Django :: 2.1',
-    ],
-    install_requires=[
-        'django-yaa-settings',
+        'Framework :: Django :: 2.2',
+        'Framework :: Django :: 3.0'
     ],
     extras_require={
         'dev': [

@@ -3,7 +3,6 @@ Test admin tools
 """
 from io import BytesIO, TextIOWrapper
 import csv
-import six
 import zipfile
 
 import django
@@ -44,6 +43,8 @@ class AdminTestCase(TestCase):
 
 
 class TestModelAdmin(AdminTestCase):
+    databases = ["gdpr_log", "default"]
+
     def test_changelist__anonymise_action_present(self):
         mommy.make(ModelWithPrivacyMeta)
         response = self.client.get(model_root_url)
@@ -128,6 +129,8 @@ class TestModelAdmin(AdminTestCase):
 
 
 class TestAdminTool(AdminTestCase):
+    databases = ["gdpr_log", "default"]
+
     def test_tool_is_available(self):
         mommy.make(FirstSearchModel)
         response = self.client.get(tool_root_url)
@@ -282,10 +285,7 @@ class TestAdminTool(AdminTestCase):
             ],
         )
 
-        if six.PY2:
-            mode = 'rU'
-        else:
-            mode = 'r'
+        mode = 'r'
 
         with zip_file.open(
             'gdpr_assist_tests_app-FirstSearchModel.csv',

@@ -1,8 +1,6 @@
 """
 Test privacy event logging
 """
-import six
-
 from django.test import TestCase
 
 from model_mommy import mommy
@@ -16,6 +14,7 @@ from .gdpr_assist_tests_app.models import (
 
 
 class TestLogger(TestCase):
+    databases = ["gdpr_log", "default"]
     def setUp(self):
         EventLog.objects.all().delete()
 
@@ -31,7 +30,7 @@ class TestLogger(TestCase):
         self.assertEqual(log.event, EventLog.EVENT_DELETE)
         self.assertEqual(log.app_label, 'gdpr_assist_tests_app')
         self.assertEqual(log.model_name, 'ModelWithPrivacyMeta')
-        self.assertEqual(log.target_pk, six.text_type(obj_pk))
+        self.assertEqual(log.target_pk, str(obj_pk))
 
     def test_anonymise_privacy_object__anonymisation_logged(self):
         obj = mommy.make(ModelWithPrivacyMeta)
@@ -44,7 +43,7 @@ class TestLogger(TestCase):
         self.assertEqual(log.event, EventLog.EVENT_ANONYMISE)
         self.assertEqual(log.app_label, 'gdpr_assist_tests_app')
         self.assertEqual(log.model_name, 'ModelWithPrivacyMeta')
-        self.assertEqual(log.target_pk, six.text_type(obj.pk))
+        self.assertEqual(log.target_pk, str(obj.pk))
 
     def test_delete_normal_object__deletion_not_logged(self):
         obj = mommy.make(ModelWithoutPrivacyMeta)

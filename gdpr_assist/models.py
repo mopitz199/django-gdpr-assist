@@ -2,7 +2,6 @@
 Model-related functionality
 """
 from copy import copy
-import six
 
 from django.apps import apps
 from django.db import models
@@ -169,7 +168,7 @@ class PrivacyMeta(object):
 
     def export(self, instance):
         return {
-            field_name: six.text_type(getattr(instance, field_name))
+            field_name: str(getattr(instance, field_name))
             for field_name in self._export_fields
         }
 

@@ -1,10 +1,12 @@
 """
 Settings
 """
-from yaa_settings import AppSettings
-
+from .app_settings_base import AppSettings
 
 class PrivacySettings(AppSettings):
+    name = 'gdpr_assist'
+    verbose_name = 'GDPR assist'
+
     # Name of the model attribute for a privacy definition
     GDPR_PRIVACY_CLASS_NAME = 'PrivacyMeta'
 
