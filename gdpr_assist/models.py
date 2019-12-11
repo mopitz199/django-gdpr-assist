@@ -25,6 +25,14 @@ class PrivacyQuerySet(models.query.QuerySet):
         for obj in self:
             obj.anonymise()
 
+    def bulk_anonymise(self):
+        """
+        Anonymise all privacy-registered objects in this queryset
+        without saving or triggering any singnal
+        """
+        for obj in self:
+            obj.anonymise(commit=False)
+
     def delete(self):
         """
         Anonymise privacy-registered objects related to this queryset
@@ -187,12 +195,13 @@ class PrivacyModel(models.Model):
     """
     anonymised = models.BooleanField(default=False)
 
-    def anonymise(self, force=False):
+    def anonymise(self, force=False, commit=False):
         # Only anonymise things once to avoid a circular anonymisation
         if self.anonymised and not force:
             return
 
-        pre_anonymise.send(sender=self.__class__, instance=self)
+        if not commit:
+            pre_anonymise.send(sender=self.__class__, instance=self)
 
         # Anonymise data
         self.anonymised = True
@@ -204,11 +213,12 @@ class PrivacyModel(models.Model):
             )
             anonymiser(self)
 
-        # Log the obj class and pk
-        self._log_gdpr_anonymise()
+        if not commit:
+            # Log the obj class and pk
+            self._log_gdpr_anonymise()
 
-        self.save()
-        post_anonymise.send(sender=self.__class__, instance=self)
+            self.save()
+            post_anonymise.send(sender=self.__class__, instance=self)
 
     def _log_gdpr_delete(self):
         EventLog.objects.log_delete(self)
