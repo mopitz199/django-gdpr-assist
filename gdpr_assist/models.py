@@ -195,12 +195,12 @@ class PrivacyModel(models.Model):
     """
     anonymised = models.BooleanField(default=False)
 
-    def anonymise(self, force=False, commit=False):
+    def anonymise(self, force=False, commit=True):
         # Only anonymise things once to avoid a circular anonymisation
         if self.anonymised and not force:
             return
 
-        if not commit:
+        if commit:
             pre_anonymise.send(sender=self.__class__, instance=self)
 
         # Anonymise data
@@ -213,7 +213,7 @@ class PrivacyModel(models.Model):
             )
             anonymiser(self)
 
-        if not commit:
+        if commit:
             # Log the obj class and pk
             self._log_gdpr_anonymise()
 
