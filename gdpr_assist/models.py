@@ -198,7 +198,7 @@ class PrivacyModel(models.Model):
     """
     anonymised = models.BooleanField(default=False)
 
-    def anonymise(self, force=False, commit=True):
+    def anonymise(self, force=False, commit=True, anonymiser_user_id=None):
         # Only anonymise things once to avoid a circular anonymisation
         if self.anonymised and not force:
             return
@@ -220,8 +220,9 @@ class PrivacyModel(models.Model):
             # Log the obj class and pk
             self._log_gdpr_anonymise()
 
-            self.save()
-            post_anonymise.send(sender=self.__class__, instance=self)
+        self.save()
+        self.anonymiser_user_id = anonymiser_user_id
+        post_anonymise.send(sender=self.__class__, instance=self)
 
     def _log_gdpr_delete(self):
         EventLog.objects.log_delete(self)
@@ -276,6 +277,7 @@ class EventLogManager(models.Manager):
             app_label=cls._meta.app_label,
             model_name=cls._meta.object_name,
             target_pk=instance.pk,
+            created_by=instance.anonymiser_user_id,
         )
 
 
@@ -294,6 +296,8 @@ class EventLog(models.Model):
     app_label = models.CharField(max_length=255)
     model_name = models.CharField(max_length=255)
     target_pk = models.TextField()
+    created_at = models.DateTimeField(auto_now=True)
+    created_by = models.IntegerField()
 
     objects = EventLogManager()
 
