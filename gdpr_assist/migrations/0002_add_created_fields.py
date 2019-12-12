@@ -14,7 +14,7 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AlterField(
             model_name='EventLog',
-            name='created',
+            name='created_at',
             field=models.DateTimeField(auto_now_add=True),
         ),
         migrations.AlterField(
