@@ -218,17 +218,16 @@ class PrivacyModel(models.Model):
 
         if commit:
             # Log the obj class and pk
-            self._log_gdpr_anonymise()
+            self._log_gdpr_anonymise(requester_id)
 
         self.save()
-        self.requester_id = requester_id
         post_anonymise.send(sender=self.__class__, instance=self)
 
     def _log_gdpr_delete(self):
         EventLog.objects.log_delete(self)
 
-    def _log_gdpr_anonymise(self):
-        EventLog.objects.log_anonymise(self)
+    def _log_gdpr_anonymise(self, requester_id=None):
+        EventLog.objects.log_anonymise(self, requester_id)
 
     @classmethod
     def _cast_class(cls, model, privacy_meta):
@@ -267,17 +266,17 @@ class EventLogManager(models.Manager):
     def log_delete(self, instance):
         self.log(self.model.EVENT_DELETE, instance)
 
-    def log_anonymise(self, instance):
-        self.log(self.model.EVENT_ANONYMISE, instance)
+    def log_anonymise(self, instance, requester_id):
+        self.log(self.model.EVENT_ANONYMISE, instance, requester_id)
 
-    def log(self, event, instance):
+    def log(self, event, instance, requester_id=None):
         cls = instance.__class__
         self.create(
             event=event,
             app_label=cls._meta.app_label,
             model_name=cls._meta.object_name,
             target_pk=instance.pk,
-            created_by=instance.requester_id,
+            created_by=requester_id,
         )
 
 
