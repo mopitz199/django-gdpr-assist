@@ -12,12 +12,12 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.AlterField(
+        migrations.AddField(
             model_name='EventLog',
             name='created_at',
             field=models.DateTimeField(auto_now_add=True),
         ),
-        migrations.AlterField(
+        migrations.AddField(
             model_name='EventLog',
             name='created_by',
             field=models.IntegerField(null=True),
