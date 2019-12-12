@@ -219,9 +219,8 @@ class PrivacyModel(models.Model):
         if commit:
             # Log the obj class and pk
             self._log_gdpr_anonymise(requester_id)
-
-        self.save()
-        post_anonymise.send(sender=self.__class__, instance=self)
+            self.save()
+            post_anonymise.send(sender=self.__class__, instance=self)
 
     def _log_gdpr_delete(self):
         EventLog.objects.log_delete(self)
