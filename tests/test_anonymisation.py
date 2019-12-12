@@ -966,10 +966,16 @@ class TestBulkAnonymisation(TestAnonymisationBase):
 
     def test_bulk_anonymise(self):
         value = 1
-        obj = self.create(models.BigIntegerField, value)
-        self.assertFalse(obj.anonymised)
-        orig = obj.field
-        self.assertEqual(orig, value)
+        object_1 = self.create(models.BigIntegerField, value)
+        object_2 = self.create(models.BigIntegerField, value)
+
+        self.assertFalse(object_1.anonymised)
+        self.assertEqual(object_1.field, value)
+
+        self.assertFalse(object_2.anonymised)
+        self.assertEqual(object_2.field, value)
+
+        self.assertIsNot(object_1, object_2)
 
         objects = self.get_model(models.BigIntegerField).objects.all()
 
@@ -978,3 +984,4 @@ class TestBulkAnonymisation(TestAnonymisationBase):
         for obj in objects:
             self.assertTrue(obj.anonymised)
             self.assertIsNone(obj.field)
+
