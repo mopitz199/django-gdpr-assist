@@ -980,8 +980,9 @@ class TestBulkAnonymisation(TestAnonymisationBase):
         objects = self.get_model(models.BigIntegerField).objects.all()
 
         objects.bulk_anonymise()
+        # Refresh queryset
+        objects = objects.all()
 
         for obj in objects:
             self.assertTrue(obj.anonymised)
             self.assertIsNone(obj.field)
-
