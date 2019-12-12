@@ -955,3 +955,26 @@ class TestQuerySet(TestCase):
         for i in range(5):
             objs[i].refresh_from_db()
             self.assertEqual(objs[i].chars, '')
+
+
+class TestBulkAnonymisation(TestAnonymisationBase):
+    """
+    Test all field types when they do have null=True
+    """
+    databases = ["gdpr_log", "default"]
+    models = nullable_models
+
+    def test_bulk_anonymise(self):
+        value = 1
+        obj = self.create(models.BigIntegerField, value)
+        self.assertFalse(obj.anonymised)
+        orig = obj.field
+        self.assertEqual(orig, value)
+
+        objects = self.get_model(models.BigIntegerField).objects.all()
+
+        objects.bulk_anonymise()
+
+        for obj in objects:
+            self.assertTrue(obj.anonymised)
+            self.assertIsNone(obj.field)

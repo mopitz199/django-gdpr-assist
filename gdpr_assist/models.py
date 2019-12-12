@@ -7,6 +7,7 @@ from django.apps import apps
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django.utils.functional import cached_property
+from django_bulk_update.helper import bulk_update
 
 from . import app_settings
 from . import handlers  # noqa
@@ -32,6 +33,8 @@ class PrivacyQuerySet(models.query.QuerySet):
         """
         for obj in self:
             obj.anonymise(commit=False)
+
+        bulk_update(self)
 
     def delete(self):
         """
