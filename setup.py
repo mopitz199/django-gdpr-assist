@@ -119,6 +119,7 @@ setup(
         'Framework :: Django :: 2.2',
         'Framework :: Django :: 3.0'
     ],
+    install_requires=['django-bulk-update'],
     extras_require={
         'dev': [
             # Testing
