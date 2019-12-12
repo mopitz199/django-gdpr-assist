@@ -957,10 +957,29 @@ class TestQuerySet(TestCase):
             self.assertEqual(objs[i].chars, '')
 
 
+class TestAnonymisationWithCommitFalse(TestAnonymisationBase):
+    databases = ["gdpr_log", "default"]
+    models = nullable_models
+
+    def test_anonymize_with_commit_false(self):
+        value = 1
+        obj = self.create(models.BigIntegerField, value)
+
+        self.assertFalse(obj.anonymised)
+        self.assertEqual(obj.field, value)
+
+        obj.anonymise(commit=False)
+
+        self.assertTrue(obj.anonymised)
+        self.assertIsNone(obj.field)
+
+        obj.refresh_from_db()
+
+        self.assertFalse(obj.anonymised)
+        self.assertEqual(obj.field, value)
+
+
 class TestBulkAnonymisation(TestAnonymisationBase):
-    """
-    Test all field types when they do have null=True
-    """
     databases = ["gdpr_log", "default"]
     models = nullable_models
 
