@@ -199,7 +199,7 @@ class PrivacyModel(models.Model):
     """
     An abstract model base class with support for anonymising data
     """
-    anonymised = models.BooleanField(default=False)
+    anonymised = models.NullBooleanField(default=False)
 
     def anonymise(self, force=False, commit=True, requester_id=None):
         # Only anonymise things once to avoid a circular anonymisation

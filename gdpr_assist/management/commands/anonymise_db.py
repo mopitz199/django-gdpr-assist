@@ -35,7 +35,7 @@ Are you sure you want to do this?
 
         if confirm == 'yes':
             for model in registry.models.keys():
-                model.objects.all().anonymise()
+                model.objects.all().bulk_anonymise()
 
             msg = "{} models anonymised.".format(len(registry.models.keys()))
             self.stdout.write(msg)
