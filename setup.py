@@ -4,7 +4,7 @@ import sys
 from setuptools import setup, find_packages
 
 
-VERSION = '2.0.0'
+VERSION = '2.0.1:q'
 
 
 def read(fname):
