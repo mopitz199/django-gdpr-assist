@@ -31,10 +31,13 @@ class PrivacyQuerySet(models.query.QuerySet):
         Anonymise all privacy-registered objects in this queryset
         without saving or triggering any singnal
         """
+
         for obj in self:
             obj.anonymise(commit=False)
 
-        bulk_update(self)
+        update_fields = ['anonymised'] + self.model._privacy_meta.fields
+
+        bulk_update(self, update_fields=update_fields)
 
     def delete(self):
         """

@@ -25,6 +25,8 @@ from .gdpr_assist_tests_app.models import (
     OneToOneFieldModel,
     ForeignKeyModel,
     ForeignKeyToUnregisteredModel,
+    ChildModelWithPrivacyMeta,
+    ChildModelWithExtendedPrivacyMeta,
 )
 from .base import MigrationTestCase
 
@@ -1005,3 +1007,73 @@ class TestBulkAnonymisation(TestAnonymisationBase):
         for obj in objects:
             self.assertTrue(obj.anonymised)
             self.assertIsNone(obj.field)
+
+
+class TestAnonymisationWithSubclassedModels(TestCase):
+    databases = ["gdpr_log", "default"]
+
+    def test_anonymise_child_with_privacy_meta(self):
+
+        value = 'pii'
+        obj = ChildModelWithPrivacyMeta.objects.create(chars_parent=value, chars_child=value)
+
+        self.assertEqual(obj.chars_parent, value)
+        self.assertEqual(obj.chars_child, value)
+
+        obj.anonymise()
+
+        self.assertTrue(obj.anonymised)
+        self.assertEqual(obj.chars_parent, value)
+        self.assertEqual(obj.chars_child, str(obj.id))
+
+    def test_anonymise_child_with_extended_privacy_meta(self):
+
+        value = 'pii'
+        obj = ChildModelWithExtendedPrivacyMeta.objects.create(chars_parent=value, chars_child=value)
+
+        self.assertEqual(obj.chars_parent, value)
+        self.assertEqual(obj.chars_child, value)
+
+        obj.anonymise()
+
+        self.assertTrue(obj.anonymised)
+        self.assertEqual(obj.chars_parent, str(obj.id))
+        self.assertEqual(obj.chars_child, str(obj.id))
+
+
+class TestBulkAnonymisationWithSubclassedModels(TestCase):
+    databases = ["gdpr_log", "default"]
+
+    def test_anonymise_child_with_privacy_meta(self):
+        value = 'pii'
+        mommy.make(ChildModelWithPrivacyMeta, chars_parent=value, chars_child=value, _quantity=3)
+
+        objs = ChildModelWithPrivacyMeta.objects.all()
+
+        for obj in objs:
+            self.assertEqual(obj.chars_parent, value)
+            self.assertEqual(obj.chars_child, value)
+
+        objs.bulk_anonymise()
+
+        for obj in objs:
+            self.assertTrue(obj.anonymised)
+            self.assertEqual(obj.chars_parent, value)
+            self.assertEqual(obj.chars_child, str(obj.id))
+
+    def test_anonymise_child_with_extended_privacy_meta(self):
+        value = 'pii'
+        mommy.make(ChildModelWithExtendedPrivacyMeta, chars_parent=value, chars_child=value, _quantity=3)
+
+        objs = ChildModelWithPrivacyMeta.objects.all()
+
+        for obj in objs:
+            self.assertEqual(obj.chars_parent, value)
+            self.assertEqual(obj.chars_child, value)
+
+        objs.bulk_anonymise()
+
+        for obj in objs:
+            self.assertTrue(obj.anonymised)
+            self.assertEqual(obj.chars_parent, str(obj.id))
+            self.assertEqual(obj.chars_child, str(obj.id))

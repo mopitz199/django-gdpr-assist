@@ -51,6 +51,33 @@ class PrivateUnregisteredTargetModel(models.Model):
     chars = models.CharField(max_length=255, blank=True)
 
 
+class ParentModel(models.Model):
+    """
+    Target model for tests with model inheritance
+    """
+    chars_parent = models.CharField(max_length=255)
+
+
+class ChildModelWithPrivacyMeta(ParentModel):
+    """
+    Target model for tests with model inheritance
+    """
+    chars_child = models.CharField(max_length=255)
+
+    class PrivacyMeta:
+        fields = ['chars_child']
+
+
+class ChildModelWithExtendedPrivacyMeta(ParentModel):
+    """
+    Target model for tests with model inheritance
+    """
+    chars_child = models.CharField(max_length=255)
+
+    class PrivacyMeta:
+        fields = ['chars_parent', 'chars_child']
+
+
 def field_model_factory(model_name, field_instance, field_name='field'):
     cls = type(
         str(model_name.format(field_instance.__class__.__name__)),
