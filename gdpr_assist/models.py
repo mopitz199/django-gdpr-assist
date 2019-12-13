@@ -298,7 +298,7 @@ class EventLog(models.Model):
     model_name = models.CharField(max_length=255)
     target_pk = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
-    created_by = models.IntegerField()
+    created_by = models.IntegerField(null=True)
 
     objects = EventLogManager()
 
